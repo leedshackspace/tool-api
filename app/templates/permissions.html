@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+  <div class="col">
+    <a href="/permissions/new"><button class="btn btn-success">New permission</button></a>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    {% if permission_list is defined %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Machine Name</th>
+            <th scope="col">Username</th>
+            <th scope="col">Can Induct</th>
+            <th scope="col">Can Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for permission_ in permission_list %}
+          {# Iterate over the list of permissions #}
+          <tr>
+            <th scope="row">{{ permission_.machine.machinename }}</th>
+            <td>{{ permission_.user.username }}</td>
+            <td>{{ permission_.caninduct }}</td>
+            <td>{{ permission_.canuse }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      No permissions found!
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

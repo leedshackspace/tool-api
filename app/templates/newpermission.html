@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block body %}
+
+{# Check to see if an error status has been set to either true or false, and display the appropriate alert #}
+{% if error is defined %}
+  {% if error %}
+    <div class="alert alert-danger" role="alert" id="alertdiv">
+      Failed to create permission! {{ error_string }}
+    </div>
+  {% endif %}
+
+  {% if not error %}
+    <div class="alert alert-success" role="alert" id="alertdiv">
+      Successfully created new permission!
+    </div>
+  {% endif %}
+
+  <script type="text/javascript">
+  $('#alertdiv').delay(6000).fadeOut();
+  </script>
+
+{% endif %}
+<form  action="/permissions/new" method="post">
+  <div class="form-group">
+    <label for="useruid">User</label>
+    <select name="useruid" class="form-control">
+      {% for user in user_list %}
+      <option value="{{ user.useruid }}" name="useruid">{{ user.username }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <b>to</b>
+  </div>
+  <div class="form-group">
+    <label for="machineuid">Machine</label>
+    <select name="machineuid" class="form-control">
+      {% for machine in machine_list %}
+      <option value="{{ machine.machineuid }}">{{ machine.machinename }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="checkbox"><input type="checkbox" id="canuse" name="canuse">Can Use</label><br>
+    <label class="checkbox"><input type="checkbox" id="caninduct" name="caninduct">Can Induct</label>
+  </div>
+  <input type="submit" class="btn btn-primary" value="Create">
+</form>
+
+{% endblock %}

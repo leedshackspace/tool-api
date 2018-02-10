@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block body %}
+
+{# Check to see if an error status has been set to either true or false, and display the appropriate alert #}
+{% if error is defined %}
+  {% if error %}
+    <div class="alert alert-danger" role="alert" id="alertdiv">
+      Failed to create user! {{ error_string }}
+    </div>
+  {% endif %}
+
+  {% if not error %}
+    <div class="alert alert-success" role="alert" id="alertdiv">
+      Successfully created new user!
+    </div>
+  {% endif %}
+
+  <script type="text/javascript">
+  $('#alertdiv').delay(6000).fadeOut();
+  </script>
+
+{% endif %}
+<form  action="/users/new" method="post">
+  <div class="form-group">
+    <label for="useruid">User UID</label>
+    <input class="form-control" type="text" name="useruid" id="useruid" value="{{ user_uid }}" readonly>
+  </div>
+  <div class="form-group">
+    <label for="machinename">User name</label>
+    <input class="form-control" type="text" name="username" id="username" maxlength="45">
+  </div>
+  <div class="form-group">
+    <label for="carduid">Card UID</label>
+    <input class="form-control" type="text" name="carduid" id="carduid" maxlength="45">
+  </div>
+  <input type="submit" class="btn btn-primary" value="Create">
+</form>
+
+{% endblock %}
