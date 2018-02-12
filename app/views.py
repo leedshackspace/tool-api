@@ -218,19 +218,23 @@ def machineusage(machine):
 #Check if a card is valid for use on a certain machine
 @app.route('/canuse/<machine>/<card>')
 def checkvalid(machine, card):
-    user = User.select(User.useruid).where(User.carduid == card).execute()
-
-    userlist = []
-    for u in user:
-        userlist.append(u)
-
-    result = Permission.select(Permission.canuse, Permission.caninduct).where(Permission.machineuid == machine).where(Permission.useruid == userlist[0].useruid).dicts().execute()
+    # Subquery to consolidate the card ID request and limit response to one.
+    userselect = User.select(User.useruid).where(User.carduid == card)
+    result = Permission.select(Permission.canuse, Permission.caninduct).where(Permission.machineuid == machine).where(Permission.useruid == userselect).limit(1).dicts().execute()
 
     resultlist = []
     for r in result:
         resultlist.append(r)
-
-    return(json.dumps(resultlist))
+    
+    # If there wasn't anything in the returned result then deny access,
+    # otherwise give out the result.
+    if len (resultlist) != 0:
+        return(json.dumps(resultlist))
+    else:
+        # Resort to denying access if there was no response.
+        # Can this be less of a "literal string"?
+        return "[{\"caninduct\": 0, \"canuse\": 0}]"
+    
     '''
     if(result > 0):
         return(result)
