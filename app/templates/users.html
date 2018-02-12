@@ -11,17 +11,17 @@
       <table class="table">
         <thead>
           <tr>
+            <th scope="col">Username</th>
             <th scope="col">User UID</th>
-            <th scope="col">User Name</th>
             <th scope="col">Card UID</th>
           </tr>
         </thead>
         <tbody>
           {% for user_ in user_list %}
-          {# Iterate over the list of machines #}
+          {# Iterate over the list of users #}
           <tr>
-            <th scope="row"><a href="{{ url_for('user', user_uid=user_.useruid)}}">{{ user_.useruid }}</th>
-            <td>{{ user_.username }}</th>
+            <th scope="row"><a href="{{ url_for('user', user_uid=user_.useruid)}}">{{ user_.username }}</th>
+            <td>{{ user_.useruid }}</th>
             <td>{{ user_.carduid }}</th>
           </tr>
           {% endfor %}
