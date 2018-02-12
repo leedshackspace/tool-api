@@ -6,6 +6,7 @@ See "requirements.txt" for exact versions
 - Python3
 - Peewee (version greater than V3 - I am running V3.0.16)
 - Flask
+- PyMySQL
 - A MySQL server
 
 # how to run
