@@ -11,8 +11,8 @@
       <table class="table">
         <thead>
           <tr>
+            <th scope="col">Machine Name</th>
             <th scope="col">Machine UID</th>
-            <th scope="col">Machine name</th>
             <th scope="col">Creator</th>
           </tr>
         </thead>
@@ -20,8 +20,8 @@
           {% for machine_ in machine_list %}
           {# Iterate over the list of machines #}
           <tr>
-            <th scope="row"><a href="{{ url_for('machine', machine_uid=machine_.machineuid)}}">{{ machine_.machineuid }}</th>
-            <td>{{ machine_.machinename }}</th>
+            <th scope="row"><a href="{{ url_for('machine', machine_uid=machine_.machineuid)}}">{{ machine_.machinename }}</th>
+            <td>{{ machine_.machineuid }}</th>
             <td>{{ machine_.creator }}</th>
           </tr>
           {% endfor %}
