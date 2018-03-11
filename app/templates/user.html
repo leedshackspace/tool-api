@@ -1,5 +1,25 @@
 {% extends "base.html" %}
 {% block body %}
-<h2>Last usage for {{ user_details.username }}</h2><br>
+<h2>Last usage for {{ user_details.username }}</h2>
+<p>Showing the 25 most recent entries.</p>
 
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Machine Name</th>
+      <th scope="col">Start Time</th>
+      <th scope="col">Time Used</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for used_ in last_usage %}
+    {# Iterate over the last 25 log entries #}
+    <tr>
+      <td scope="row"><a href="{{ url_for('machine', machine_uid=used_.machineuid) }}">{{ used_.machine.machinename }}</th></td>
+      <td>{{ used_.starttime}}</td>
+      <td>{{ used_.elapsed }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
