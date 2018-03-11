@@ -156,7 +156,16 @@ def user(user_uid):
     try:
         #Pass the machine name through
         user_details = User.get(User.useruid == user_uid)
-        return render_template("user.html", user_details=user_details)
+        last_usage = Log.select(Log, Machine).join(Machine, on=(Machine.machineuid==Log.machineuid)).where(Log.useruid == user_uid).order_by(Log.starttime.desc()).limit(25)
+
+        # Calculate the time delta for the log display, and pretty-print it. Not sure this is
+        # the best way to do this, suggestions welcome.
+        for p in last_usage:
+            timediff = p.endtime - p.starttime
+            p.elapsed = format_timedelta(timediff, granularity="second", locale="en_GB")
+
+        return render_template("user.html", user_details=user_details, last_usage=last_usage)
+
     except Exception as ex:
         return "Error! %s" % str(ex)
 
