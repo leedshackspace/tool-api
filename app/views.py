@@ -9,6 +9,7 @@ from playhouse import shortcuts
 import json
 import logging
 import datetime
+from babel.dates import format_timedelta
 
 #Shamelessly taken from http://flask.pocoo.org/snippets/45/ - works well
 def request_wants_json():
@@ -102,7 +103,15 @@ def machine(machine_uid):
     try:
         #Pass the machine name through
         machine_details = Machine.get(Machine.machineuid == machine_uid)
-        return render_template("machine.html", machine_details=machine_details)
+        last_usage = Log.select(Log, User).join(User, on=(Log.useruid==User.useruid)).where(Log.machineuid == machine_uid).order_by(Log.starttime.desc()).limit(25)
+
+        # Calculate the time delta for the log display, and pretty-print it. Not sure this is
+        # the best way to do this, suggestions welcome.
+        for p in last_usage:
+            timediff = p.endtime - p.starttime
+            p.elapsed = format_timedelta(timediff, granularity="second", locale="en_GB")
+
+        return render_template("machine.html", machine_details=machine_details, last_usage=last_usage)
     except Exception as ex:
         return "Error! %s" % str(ex)
 
