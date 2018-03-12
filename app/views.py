@@ -285,10 +285,15 @@ def logusage():
         log.machineuid = json["machineuid"]
 
         # Check that the machine UID exists and is associated with a machine.
-        machineQuery = Machine.select().where(Machine.machineuid == log.machineuid)
-        if machineQuery.exists() is False:
+        machineQuery = Machine.get(Machine.machineuid == log.machineuid)
+        if machineQuery is None:
             print ("Bad request, Machine UID doesn't exist.")
             return "{\"error\":\"Machine UID doesn't exist\"}", 400 # 400 BAD REQUEST
+
+
+        log.charge = machineQuery.costperminute * int(json["elapsed"]) / 60
+        if log.charge < machineQuery.costminimum:
+            log.charge = machineQuery.costminimum
 
         # Check that the Card UID exists and is associated with a user UID. This is what
         # we need to associate the log request with.
