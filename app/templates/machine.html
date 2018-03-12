@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 {% block body %}
-<h2>Last usage for {{ machine_details.machinename }}</h2>
+<h2>{{ machine_details.machinename }}</h2>
+<div class="row">
+  <div class="col-sm">
+      <!-- Status doesn't mean anything at the moment... Just a placeholder-->
+      <h6>Current Status</h6>
+      <p>{{ machine_details.status }}</p>
+  </div>
+  <div class="col-sm">
+    <h6>Cost Per Minute</h6>
+    <p>{{ "£%.2f"|format(machine_details.costperminute)}}</p>
+  </div>
+  <div class="col-sm">
+      <h6>Minimum Charge</h6>
+      <p>{{ "£%.2f"|format(machine_details.costminimum)}}</p>
+  </div>
+
+</div>
+<h3>Latest Usage</h3>
 <p>Showing the 25 most recent entries.</p>
 
 <table class="table">
