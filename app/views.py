@@ -129,7 +129,7 @@ def newmachine():
     elif request.method == 'POST':
         #This will be POSTed data this time, try create a new machine
         try:
-            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True)
+            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True, costperminute=request.form['costperminute'], costminimum=request.form['costminimum'])
             return render_template("newmachine.html", error=False, machine_uid=str(uuid4()))
         #Catch every exception so we can print out the error
         except Exception as ex:
