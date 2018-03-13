@@ -109,7 +109,7 @@ def machine(machine_uid):
         # the best way to do this, suggestions welcome.
         for p in last_usage:
             timediff = p.endtime - p.starttime
-            p.elapsed = format_timedelta(timediff, granularity="second", locale="en_GB")
+            p.elapsed = format_timedelta(timediff, granularity="second", threshold=2, locale="en_GB")
 
         return render_template("machine.html", machine_details=machine_details, last_usage=last_usage)
     except Exception as ex:
@@ -291,7 +291,7 @@ def logusage():
             return "{\"error\":\"Machine UID doesn't exist\"}", 400 # 400 BAD REQUEST
 
 
-        log.charge = machineQuery.costperminute * int(json["elapsed"]) / 60
+        log.charge = round(machineQuery.costperminute * int(json["elapsed"]) / 60, 1)
         if log.charge < machineQuery.costminimum:
             log.charge = machineQuery.costminimum
 
