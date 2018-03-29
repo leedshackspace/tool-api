@@ -285,11 +285,10 @@ def logusage():
         log.machineuid = json["machineuid"]
 
         # Check that the machine UID exists and is associated with a machine.
-        machineQuery = Machine.get(Machine.machineuid == log.machineuid)
-        if machineQuery is None:
+        machineQuery = Machine.select().where(Machine.machineuid == log.machineuid)
+        if machineQuery.exists() is False:
             print ("Bad request, Machine UID doesn't exist.")
             return "{\"error\":\"Machine UID doesn't exist\"}", 400 # 400 BAD REQUEST
-
 
         log.charge = round(machineQuery.costperminute * int(json["elapsed"]) / 60, 1)
         if log.charge < machineQuery.costminimum:
