@@ -15,6 +15,7 @@ class Log(ModelBase):
     notes = CharField(null=True)
     starttime = DateTimeField(null=True)
     useruid = CharField(null=True)
+    charge = FloatField()
 
     class Meta:
         table_name = 'log'
@@ -25,6 +26,8 @@ class Machine(ModelBase):
     machineuid = CharField(unique=True)
     machinename = CharField()
     status = IntegerField(null=True)
+    costperminute = FloatField()
+    costminimum = FloatField()
 
     class Meta:
         table_name = 'machine'

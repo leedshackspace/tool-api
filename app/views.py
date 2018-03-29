@@ -8,6 +8,8 @@ from uuid import *
 from playhouse import shortcuts
 import json
 import logging
+import datetime
+from babel.dates import format_timedelta
 
 #Shamelessly taken from http://flask.pocoo.org/snippets/45/ - works well
 def request_wants_json():
@@ -101,7 +103,15 @@ def machine(machine_uid):
     try:
         #Pass the machine name through
         machine_details = Machine.get(Machine.machineuid == machine_uid)
-        return render_template("machine.html", machine_details=machine_details)
+        last_usage = Log.select(Log, User).join(User, on=(Log.useruid==User.useruid)).where(Log.machineuid == machine_uid).order_by(Log.starttime.desc()).limit(25)
+
+        # Calculate the time delta for the log display, and pretty-print it. Not sure this is
+        # the best way to do this, suggestions welcome.
+        for p in last_usage:
+            timediff = p.endtime - p.starttime
+            p.elapsed = format_timedelta(timediff, granularity="second", threshold=2, locale="en_GB")
+
+        return render_template("machine.html", machine_details=machine_details, last_usage=last_usage)
     except Exception as ex:
         return "Error! %s" % str(ex)
 
@@ -119,7 +129,7 @@ def newmachine():
     elif request.method == 'POST':
         #This will be POSTed data this time, try create a new machine
         try:
-            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True)
+            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True, costperminute=request.form['costperminute'], costminimum=request.form['costminimum'])
             return render_template("newmachine.html", error=False, machine_uid=str(uuid4()))
         #Catch every exception so we can print out the error
         except Exception as ex:
@@ -146,7 +156,16 @@ def user(user_uid):
     try:
         #Pass the machine name through
         user_details = User.get(User.useruid == user_uid)
-        return render_template("user.html", user_details=user_details)
+        last_usage = Log.select(Log, Machine).join(Machine, on=(Machine.machineuid==Log.machineuid)).where(Log.useruid == user_uid).order_by(Log.starttime.desc()).limit(25)
+
+        # Calculate the time delta for the log display, and pretty-print it. Not sure this is
+        # the best way to do this, suggestions welcome.
+        for p in last_usage:
+            timediff = p.endtime - p.starttime
+            p.elapsed = format_timedelta(timediff, granularity="second", locale="en_GB")
+
+        return render_template("user.html", user_details=user_details, last_usage=last_usage)
+
     except Exception as ex:
         return "Error! %s" % str(ex)
 
@@ -241,5 +260,71 @@ def checkvalid(machine, card):
     else:
         return("no result!")
     '''
+'''
+LOGGING
+'''
 
-#@app.route('/induct')
+@app.route('/log/new', methods=['POST'])
+def logusage():
+    try:
+        # Force parsing as JSON even if content header is
+        # incorrect, because we don't accept anything else.
+        json = request.get_json(force=True)
+    except Exception as ex:
+        # Return a bad request if we aren't getting our JSON.
+        # This could happen if the content type isn't set properly or if the JSON
+        # is particularly malformed such that it can't even be
+        print ("Bad JSON request.")
+        print(ex)
+        return "{\"error\":\"Bad JSON\"}", 400 # 400 BAD REQUEST
+
+    try:
+        log = Log()
+        log.endtime = datetime.datetime.now()
+        log.starttime = log.endtime - datetime.timedelta(seconds=int(json["elapsed"]))
+        log.machineuid = json["machineuid"]
+
+        # Check that the machine UID exists and is associated with a machine.
+        machineQuery = Machine.get(Machine.machineuid == log.machineuid)
+        if machineQuery is None:
+            print ("Bad request, Machine UID doesn't exist.")
+            return "{\"error\":\"Machine UID doesn't exist\"}", 400 # 400 BAD REQUEST
+
+
+        log.charge = round(machineQuery.costperminute * int(json["elapsed"]) / 60, 1)
+        if log.charge < machineQuery.costminimum:
+            log.charge = machineQuery.costminimum
+
+        # Check that the Card UID exists and is associated with a user UID. This is what
+        # we need to associate the log request with.
+        log.useruid = User.select(User.useruid).where(User.carduid == json["carduid"]).limit(1)
+        if log.useruid is None:
+            print ("Bad request, Card UID doesn't exist.")
+            return "{\"error\":\"Card UID doesn't exist\"}", 400 # 400 BAD REQUEST
+
+        # If we're debugging the App it would probably be nice to see all the json
+        # and also to save it in the database for future lookup.
+        # Otherwise store a readable note of seconds used.
+        if app.debug is True:
+            print(json)
+            log.notes = json
+        else:
+            log.notes = json["elapsed"] + "s used"
+
+    except (TypeError, ValueError) as ex:
+        print ("TypeError or ValueError when populating new log from JSON.")
+        print (json)
+        print (ex)
+        return "{\"error\":\"Bad JSON - bad value type or a value conversion error occurred.\"}", 400 # 400 BAD REQUEST
+
+    try:
+        log.save()
+    except Exception as ex:
+        # Had a problem saving the data to the database,
+        # so return an internal server error.
+        print("Error creating log in database.")
+        print(ex)
+        return "0", 500 # 500 SERVER ERROR
+
+    # Return created response
+    return "1", 201 # 201 CREATED
