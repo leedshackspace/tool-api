@@ -26,9 +26,36 @@
     <input class="form-control" type="text" name="machineuid" id="machineuid" value="{{ machine_uid }}" readonly>
   </div>
   <div class="form-group">
-    <label for="machinename">Machine name</label>
+    <label for="machinename">Machine Name</label>
     <input class="form-control" type="text" name="machinename" id="machinename" maxlength="45">
   </div>
+  <div class="row">
+  <div class="col-sm-6">
+       <div class="form-group">
+      <label for="machinename">Cost Per Minute</label>
+      <div class="input-group">
+          <span class="input-group-addon">£</span>
+          <input class="form-control" type="number" name="costperminute" id="costperminute" step="0.01" value="0.0" minimum="0">
+    </div>
+  </div>
+</div>
+  <div class="col-sm-6">
+    <div class="form-group">
+
+      <label for="machinename">Minimum Charge</label>
+
+      <div class="input-group">
+          <span class="input-group-addon">£</span>
+          <input class="form-control" type="number" name="costminimum" id="costminimum" step="0.01" value ="0.0" minimum="0">
+      </div>
+      <p id="minimumChargeHelpBlock" class="form-text text-muted">
+        Leave this field set to 0.0 if there is no minimum charge for this machine. If <em>Cost Per Minute</em> equals 0.0 then this value will be considered a "per use" charge.
+      </p>
+    </div>
+  </div>
+
+</div>
+
   <input type="submit" class="btn btn-primary" value="Create">
 </form>
 

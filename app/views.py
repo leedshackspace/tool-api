@@ -109,7 +109,7 @@ def machine(machine_uid):
         # the best way to do this, suggestions welcome.
         for p in last_usage:
             timediff = p.endtime - p.starttime
-            p.elapsed = format_timedelta(timediff, granularity="second", locale="en_GB")
+            p.elapsed = format_timedelta(timediff, granularity="second", threshold=2, locale="en_GB")
 
         return render_template("machine.html", machine_details=machine_details, last_usage=last_usage)
     except Exception as ex:
@@ -129,7 +129,7 @@ def newmachine():
     elif request.method == 'POST':
         #This will be POSTed data this time, try create a new machine
         try:
-            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True)
+            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True, costperminute=request.form['costperminute'], costminimum=request.form['costminimum'])
             return render_template("newmachine.html", error=False, machine_uid=str(uuid4()))
         #Catch every exception so we can print out the error
         except Exception as ex:
@@ -289,6 +289,10 @@ def logusage():
         if machineQuery.exists() is False:
             print ("Bad request, Machine UID doesn't exist.")
             return "{\"error\":\"Machine UID doesn't exist\"}", 400 # 400 BAD REQUEST
+
+        log.charge = round(machineQuery.costperminute * int(json["elapsed"]) / 60, 1)
+        if log.charge < machineQuery.costminimum:
+            log.charge = machineQuery.costminimum
 
         # Check that the Card UID exists and is associated with a user UID. This is what
         # we need to associate the log request with.
