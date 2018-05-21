@@ -129,8 +129,12 @@ def newmachine():
     elif request.method == 'POST':
         #This will be POSTed data this time, try create a new machine
         try:
-            Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True, costperminute=request.form['costperminute'], costminimum=request.form['costminimum'])
-            return render_template("newmachine.html", error=False, machine_uid=str(uuid4()))
+            exists = Machine.get_or_none(Machine.machinename == request.form['machinename'])
+            if exists == None:
+                Machine.create(creator="API", machinename=request.form['machinename'], machineuid=request.form['machineuid'], status=True, costperminute=request.form['costperminute'], costminimum=request.form['costminimum'])
+                return render_template("newmachine.html", error=False, machine_uid=str(uuid4()))
+            else:
+                return render_template("newmachine.html", error=True, error_string="Machine with that name already exists!", machine_uid=str(uuid4()))
         #Catch every exception so we can print out the error
         except Exception as ex:
             #Return with error, and set up form for a new UUID
@@ -179,8 +183,12 @@ def newuser():
     elif request.method == 'POST':
         #This will be POSTed data this time, try create a new user
         try:
-            User.create(creator="API", username=request.form['username'], useruid=request.form['useruid'], carduid=request.form['carduid'], valid=True)
-            return render_template("newuser.html", error=False, user_uid=str(uuid4()))
+            exists = User.get_or_none(User.username == request.form['username'])
+            if exists == None:
+                User.create(creator="API", username=request.form['username'], useruid=request.form['useruid'], carduid=request.form['carduid'], valid=True)
+                return render_template("newuser.html", error=False, user_uid=str(uuid4()))
+            else:
+                return render_template("newuser.html", error=True, error_string="User with that name already exists!", user_uid=str(uuid4()))
         #Catch every exception so we can print out the error
         except Exception as ex:
             #Return with error, and set up form for a new UUID
