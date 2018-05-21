@@ -46,9 +46,7 @@ class Permission(ModelBase):
     canuse = IntegerField(null=True)
     creator = CharField(null=True)
     machineuid = ForeignKeyField(column_name='machineuid', model=Machine, field='machineuid')
-#    machineuid = ForeignKeyField(Machine, related_name='machineuid')
     useruid = ForeignKeyField(column_name='useruid', model=User, field='useruid')
-#    useruid = ForeignKeyField(User, related_name='useruid')
 
     class Meta:
         table_name = 'permission'
