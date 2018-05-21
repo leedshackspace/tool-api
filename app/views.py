@@ -172,9 +172,6 @@ def user(user_uid):
 #Register a new user
 @app.route('/users/new', methods=['GET', 'POST'])
 def newuser():
-    #Used to test that the database worked
-    #Machine.create(creator='APITest', machinename='TestMachine', machineuid='MakeAProperUID', status=True)
-
     #Check if GET versus POST
     if request.method == 'GET':
         #If GET return the base form with UUID
@@ -200,9 +197,6 @@ def permissions():
 #Register a new permission
 @app.route('/permissions/new', methods=['GET', 'POST'])
 def newpermission():
-    #Used to test that the database worked
-    #Machine.create(creator='APITest', machinename='TestMachine', machineuid='MakeAProperUID', status=True)
-
     #Check if GET versus POST
     if request.method == 'GET':
         #If GET return the base form
@@ -210,7 +204,6 @@ def newpermission():
     elif request.method == 'POST':
         #This will be POSTed data this time, try create a new permission
         try:
-            #This has to be put in, because, you know, the form doesn't return anything sensible :|
             if request.form.get('canuse'):
                 canuse = True
             else:
@@ -221,8 +214,13 @@ def newpermission():
             else:
                 caninduct = False
 
-            Permission.create(creator="API", machineuid=request.form['machineuid'], useruid=request.form['useruid'], caninduct=caninduct, canuse=canuse)
-            return render_template("newpermission.html", user_list=User.select(), machine_list=Machine.select(), error=False)
+            existing_permission = Permission.get_or_none(Permission.machineuid == request.form['machineuid'], Permission.useruid == request.form['useruid'])
+
+            if existing_permission == None:
+                Permission.create(creator="API", machineuid=request.form['machineuid'], useruid=request.form['useruid'], caninduct=caninduct, canuse=canuse)
+                return render_template("newpermission.html", user_list=User.select(), machine_list=Machine.select(), error=False)
+            else:
+                return render_template("newpermission.html", user_list=User.select(), machine_list=Machine.select(), error=True, error_string="Permission already exists!")
         #Catch every exception so we can print out the error
         except Exception as ex:
             #Return with error, and set up form for a new UUID
@@ -244,7 +242,7 @@ def checkvalid(machine, card):
     resultlist = []
     for r in result:
         resultlist.append(r)
-    
+
     # If there wasn't anything in the returned result then deny access,
     # otherwise give out the result.
     if len (resultlist) != 0:
@@ -253,7 +251,7 @@ def checkvalid(machine, card):
         # Resort to denying access if there was no response.
         # Can this be less of a "literal string"?
         return "[{\"caninduct\": 0, \"canuse\": 0}]"
-    
+
     '''
     if(result > 0):
         return(result)
