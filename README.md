@@ -1,3 +1,6 @@
+# ARCHIVED
+This project has been archived by Callum Snowden, as I'm working on a new version that is just all round "nicer".
+
 # tool-api
 An 'API'/web interface for administering machines & users.
 
